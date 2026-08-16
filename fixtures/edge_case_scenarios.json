@@ -1,0 +1,327 @@
+{
+  "edge_case_scenarios": [
+    {
+      "id": 1,
+      "title": "Direct Contradiction",
+      "description": "Two sources make directly contradictory claims about the same entity",
+      "scenario": {
+        "query": "What is John's profession?",
+        "sources": [
+          {
+            "type": "pdf",
+            "name": "Professional Resume",
+            "text": "John Smith is a certified software engineer with 10 years of experience in the field.",
+            "reliability": 1.0
+          },
+          {
+            "type": "text",
+            "name": "Social Media",
+            "text": "John is practicing law and runs his own legal firm.",
+            "reliability": 0.5
+          }
+        ],
+        "expected_conflict": "DIRECT_CONTRADICTION",
+        "expected_resolution": "Accept PDF source (higher reliability)",
+        "expected_confidence": 0.95
+      }
+    },
+    {
+      "id": 2,
+      "title": "Temporal Conflict",
+      "description": "Same entity has different properties at different points in time",
+      "scenario": {
+        "query": "What was John's career progression?",
+        "sources": [
+          {
+            "type": "pdf",
+            "name": "Biography 2020",
+            "text": "In 2020, John worked as an engineer at Tech Corp.",
+            "reliability": 1.0,
+            "temporal_marker": "2020"
+          },
+          {
+            "type": "youtube",
+            "name": "Interview 2024",
+            "text": "As of 2024, John has transitioned to product management at a different company.",
+            "reliability": 0.7,
+            "temporal_marker": "2024"
+          }
+        ],
+        "expected_conflict": "TEMPORAL_CONFLICT",
+        "expected_resolution": "Accept most recent fact (2024)",
+        "expected_confidence": 0.85
+      }
+    },
+    {
+      "id": 3,
+      "title": "Source Reliability Hierarchy",
+      "description": "Conflicting facts where one is from PDF and one from YouTube",
+      "scenario": {
+        "query": "When was the Internet invented?",
+        "sources": [
+          {
+            "type": "pdf",
+            "name": "Academic Paper",
+            "text": "The Internet was first developed in 1969 with ARPANET.",
+            "reliability": 1.0
+          },
+          {
+            "type": "youtube",
+            "name": "Educational Video",
+            "text": "The web was created by Tim Berners-Lee in 1989.",
+            "reliability": 0.7
+          }
+        ],
+        "expected_conflict": "DIRECT_CONTRADICTION",
+        "expected_resolution": "Accept PDF (1.0 > 0.7)",
+        "expected_confidence": 0.9
+      }
+    },
+    {
+      "id": 4,
+      "title": "Duplicate Events",
+      "description": "Identical facts from different sources should not create conflicts",
+      "scenario": {
+        "query": "What is the capital of France?",
+        "sources": [
+          {
+            "type": "pdf",
+            "name": "Geography Book",
+            "text": "Paris is the capital of France.",
+            "reliability": 1.0
+          },
+          {
+            "type": "youtube",
+            "name": "Travel Channel",
+            "text": "Paris is the capital of France.",
+            "reliability": 0.7
+          }
+        ],
+        "expected_conflict": "NONE",
+        "expected_resolution": "No conflict detected",
+        "expected_confidence": 0.95
+      }
+    },
+    {
+      "id": 5,
+      "title": "Late-Arriving Data",
+      "description": "Conflicting data that arrives after initial processing",
+      "scenario": {
+        "query": "What is the current CEO of Company X?",
+        "initial_sources": [
+          {
+            "type": "pdf",
+            "name": "2023 Annual Report",
+            "text": "John Doe has been CEO since 2020.",
+            "reliability": 1.0
+          }
+        ],
+        "late_arriving_sources": [
+          {
+            "type": "youtube",
+            "name": "News Update 2024",
+            "text": "Jane Smith was appointed new CEO of Company X in January 2024.",
+            "reliability": 0.7,
+            "temporal_marker": "2024"
+          }
+        ],
+        "expected_behavior": "Second query should detect conflict and prefer 2024 (more recent)",
+        "expected_confidence": 0.75
+      }
+    },
+    {
+      "id": 6,
+      "title": "Internal Inconsistency",
+      "description": "Same source contains contradictory statements",
+      "scenario": {
+        "query": "Is Product X waterproof?",
+        "sources": [
+          {
+            "type": "pdf",
+            "name": "Product Manual",
+            "text": "Product X is completely waterproof and suitable for underwater use.",
+            "reliability": 1.0
+          },
+          {
+            "type": "pdf",
+            "name": "Product Manual",
+            "text": "Do not use Product X in water as it is not water-resistant.",
+            "reliability": 1.0
+          }
+        ],
+        "expected_conflict": "INTERNAL_INCONSISTENCY",
+        "expected_resolution": "Insufficient evidence (reject both)",
+        "expected_confidence": 0.0
+      }
+    },
+    {
+      "id": 7,
+      "title": "Insufficient Evidence",
+      "description": "Equal reliability sources with contradictory claims and no temporal info",
+      "scenario": {
+        "query": "Is the Earth flat or round?",
+        "sources": [
+          {
+            "type": "text",
+            "name": "Forum Post A",
+            "text": "The Earth is definitely flat based on my observations.",
+            "reliability": 0.5
+          },
+          {
+            "type": "text",
+            "name": "Forum Post B",
+            "text": "The Earth is round as confirmed by satellite imagery.",
+            "reliability": 0.5
+          }
+        ],
+        "expected_conflict": "DIRECT_CONTRADICTION",
+        "expected_resolution": "Insufficient evidence (both unreliable)",
+        "expected_confidence": 0.2
+      }
+    },
+    {
+      "id": 8,
+      "title": "Determinism/Replay Verification",
+      "description": "Identical inputs should produce identical outputs",
+      "scenario": {
+        "query": "What is the chemical formula for water?",
+        "sources": [
+          {
+            "type": "pdf",
+            "name": "Chemistry Textbook",
+            "text": "Water has the chemical formula H2O.",
+            "reliability": 1.0
+          }
+        ],
+        "replay_count": 3,
+        "expected_behavior": "All 3 replays should produce identical results",
+        "expected_deterministic_hash_match": true,
+        "expected_confidence": 0.95
+      }
+    },
+    {
+      "id": 9,
+      "title": "YouTube vs Text Hierarchy",
+      "description": "Conflicting facts where YouTube source should be preferred over text",
+      "scenario": {
+        "query": "How tall is the Eiffel Tower?",
+        "sources": [
+          {
+            "type": "youtube",
+            "name": "Paris Tour Video",
+            "text": "The Eiffel Tower stands 330 meters tall, not including the antenna.",
+            "reliability": 0.7
+          },
+          {
+            "type": "text",
+            "name": "Forum Comment",
+            "text": "I heard the Eiffel Tower is only 200 meters tall.",
+            "reliability": 0.5
+          }
+        ],
+        "expected_conflict": "DIRECT_CONTRADICTION",
+        "expected_resolution": "Accept YouTube (0.7 > 0.5)",
+        "expected_confidence": 0.7
+      }
+    },
+    {
+      "id": 10,
+      "title": "Temporal Boundary - Year Transition",
+      "description": "Conflict at year boundary (2023-12-31 to 2024-01-01)",
+      "scenario": {
+        "query": "What is the current status of Project X?",
+        "sources": [
+          {
+            "type": "pdf",
+            "name": "2023 Report",
+            "text": "Project X was in beta testing as of December 2023.",
+            "reliability": 1.0,
+            "temporal_marker": "2023"
+          },
+          {
+            "type": "youtube",
+            "name": "January 2024 Update",
+            "text": "Project X launched commercially on January 1, 2024.",
+            "reliability": 0.7,
+            "temporal_marker": "2024"
+          }
+        ],
+        "expected_conflict": "TEMPORAL_CONFLICT",
+        "expected_resolution": "Accept 2024 (more recent temporal marker)",
+        "expected_confidence": 0.75
+      }
+    },
+    {
+      "id": 11,
+      "title": "Complex Multi-Conflict Scenario",
+      "description": "Multiple sources with multiple conflicts requiring resolution",
+      "scenario": {
+        "query": "Describe the history and current state of the Mona Lisa",
+        "sources": [
+          {
+            "type": "pdf",
+            "name": "Art History Book",
+            "text": "The Mona Lisa was painted by Leonardo da Vinci between 1503-1519. It is displayed in the Louvre Museum.",
+            "reliability": 1.0
+          },
+          {
+            "type": "youtube",
+            "name": "Museum Documentary",
+            "text": "The Mona Lisa is a Renaissance masterpiece created in the early 1500s, now housed at the Louvre.",
+            "reliability": 0.7
+          },
+          {
+            "type": "text",
+            "name": "Website Comment",
+            "text": "Mona Lisa was created in France and is actually in a private collection.",
+            "reliability": 0.3
+          }
+        ],
+        "expected_conflicts": 1,
+        "expected_resolutions": 1,
+        "expected_winner": "PDF source (highest reliability)",
+        "expected_confidence": 0.9
+      }
+    }
+  ],
+  "test_fixtures": {
+    "valid_pdf_sample": {
+      "filename": "sample_document.pdf",
+      "content_preview": "This is sample PDF content about artificial intelligence...",
+      "chunk_count": 10,
+      "source_type": "pdf"
+    },
+    "valid_youtube_url": {
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "video_id": "dQw4w9WgXcQ",
+      "transcript_preview": "Welcome to this video about machine learning...",
+      "source_type": "youtube"
+    },
+    "valid_text_snippet": {
+      "text": "Artificial intelligence is the simulation of human intelligence processes...",
+      "source_name": "AI Basics",
+      "chunk_count": 2,
+      "source_type": "text"
+    }
+  },
+  "expected_behavior_spec": {
+    "conflict_detection": {
+      "direct_contradiction": "Should detect when same entity has opposite predicates",
+      "temporal_conflict": "Should detect state changes over time",
+      "internal_inconsistency": "Should flag contradictions within same source",
+      "false_positives": "Should minimize false positives by requiring semantic similarity"
+    },
+    "conflict_resolution": {
+      "reliability_hierarchy": "PDF (1.0) > YouTube (0.7) > Text (0.5)",
+      "temporal_recency": "When reliability equal, prefer most recent temporal marker",
+      "deterministic": "Same inputs always produce same outputs",
+      "confidence_scoring": "Based on resolution strategy and source reliability"
+    },
+    "audit_trails": {
+      "completeness": "Should capture all decision steps",
+      "traceability": "Should enable replay of decisions",
+      "verifiability": "Should support determinism verification",
+      "exportability": "Should export to valid JSON format"
+    }
+  }
+}

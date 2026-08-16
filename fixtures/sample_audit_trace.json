@@ -1,0 +1,124 @@
+{
+  "trace_id": "a1b2c3d4e5f6g7h8",
+  "query": "What is John's profession?",
+  "query_timestamp": "2024-01-15T14:30:00.123456",
+  "sources_considered": [
+    {
+      "source_name": "Professional Resume",
+      "source_type": "pdf",
+      "reliability_score": 1.0,
+      "chunk_count": 5,
+      "timestamp": "2024-01-15T14:29:50.000000"
+    },
+    {
+      "source_name": "Social Media",
+      "source_type": "text",
+      "reliability_score": 0.5,
+      "chunk_count": 3,
+      "timestamp": "2024-01-15T14:29:55.000000"
+    }
+  ],
+  "documents_retrieved": [
+    {
+      "doc_id": "doc_prof_resume_0",
+      "source_type": "pdf",
+      "source_name": "Professional Resume",
+      "chunk_index": 0,
+      "timestamp": "2024-01-15T14:29:50.000000",
+      "content_preview": "John Smith is a certified software engineer with 10 years of experience in the field."
+    },
+    {
+      "doc_id": "doc_social_media_0",
+      "source_type": "text",
+      "source_name": "Social Media",
+      "chunk_index": 0,
+      "timestamp": "2024-01-15T14:29:55.000000",
+      "content_preview": "John is practicing law and runs his own legal firm."
+    }
+  ],
+  "facts_extracted": [
+    {
+      "fact_id": "fact_prof_resume_sent_0",
+      "text": "John Smith is a certified software engineer with 10 years of experience in the field.",
+      "source_name": "Professional Resume",
+      "source_type": "pdf",
+      "reliability_score": 1.0,
+      "temporal_markers": [],
+      "timestamp": "2024-01-15T14:29:50.000000"
+    },
+    {
+      "fact_id": "fact_social_media_sent_0",
+      "text": "John is practicing law and runs his own legal firm.",
+      "source_name": "Social Media",
+      "source_type": "text",
+      "reliability_score": 0.5,
+      "temporal_markers": [],
+      "timestamp": "2024-01-15T14:29:55.000000"
+    }
+  ],
+  "conflicts_detected": [
+    {
+      "conflict_id": "conflict_abc123",
+      "conflict_type": "direct_contradiction",
+      "severity": "high",
+      "description": "Direct contradiction between sources: 'John Smith is a certified software engineer...' (from Professional Resume) vs 'John is practicing law...' (from Social Media)",
+      "facts_involved": [
+        {
+          "fact_id": "fact_prof_resume_sent_0",
+          "text": "John Smith is a certified software engineer with 10 years of experience in the field.",
+          "source_name": "Professional Resume"
+        },
+        {
+          "fact_id": "fact_social_media_sent_0",
+          "text": "John is practicing law and runs his own legal firm.",
+          "source_name": "Social Media"
+        }
+      ],
+      "resolution_needed": true,
+      "timestamp": "2024-01-15T14:30:00.000000"
+    }
+  ],
+  "conflicts_resolved": [
+    {
+      "conflict_id": "conflict_abc123",
+      "resolution_strategy": "source_reliability",
+      "accepted_fact": {
+        "fact_id": "fact_prof_resume_sent_0",
+        "text": "John Smith is a certified software engineer with 10 years of experience in the field.",
+        "source_name": "Professional Resume"
+      },
+      "rejected_facts": [
+        {
+          "fact_id": "fact_social_media_sent_0",
+          "text": "John is practicing law and runs his own legal firm.",
+          "source_name": "Social Media"
+        }
+      ],
+      "confidence_score": 0.95,
+      "explanation": "Accepted fact from Professional Resume (reliability: 1.00) over Social Media",
+      "timestamp": "2024-01-15T14:30:00.150000"
+    }
+  ],
+  "final_answer": "John Smith is a certified software engineer with 10 years of experience in the field. [Professional Resume]",
+  "accepted_facts": [
+    {
+      "fact_id": "fact_prof_resume_sent_0",
+      "text": "John Smith is a certified software engineer with 10 years of experience in the field.",
+      "source_name": "Professional Resume",
+      "source_type": "pdf",
+      "reliability_score": 1.0
+    }
+  ],
+  "rejected_facts": [
+    {
+      "fact_id": "fact_social_media_sent_0",
+      "text": "John is practicing law and runs his own legal firm.",
+      "source_name": "Social Media",
+      "source_type": "text",
+      "reliability_score": 0.5
+    }
+  ],
+  "overall_confidence": 0.95,
+  "processing_time_ms": 245.67,
+  "deterministic_hash": "a1b2c3d4e5f6g7h8"
+}

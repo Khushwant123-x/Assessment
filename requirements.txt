@@ -1,0 +1,29 @@
+# Core RAG and LLM
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-groq>=0.1.0
+chromadb>=0.4.0
+
+# Embeddings
+sentence-transformers>=2.2.0
+
+# Document Processing
+pypdf>=3.17.0
+youtube-transcript-api>=0.6.1
+
+# UI and API
+streamlit>=1.28.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+python-dateutil>=2.8.2
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Data validation
+jsonschema>=4.19.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
