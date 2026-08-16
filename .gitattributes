@@ -1,0 +1,29 @@
+# Git Line Endings Configuration
+# This ensures consistent line endings across different operating systems
+
+* text=auto
+
+# Shell scripts (Unix line endings)
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Windows scripts (Windows line endings)
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Python files (Unix line endings)
+*.py text eol=lf
+*.pyx text eol=lf
+
+# Documentation (Unix line endings)
+*.md text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+
+# Binary files
+*.pdf binary
+*.pyc binary
+*.so binary
+*.egg binary
