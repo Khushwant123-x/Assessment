@@ -21,6 +21,7 @@ class DecisionTrace:
     trace_id: str
     query: str
     query_timestamp: str
+    final_answer: str
     
     # Input information
     sources_considered: List[Dict[str, Any]] = field(default_factory=list)
@@ -31,8 +32,7 @@ class DecisionTrace:
     conflicts_detected: List[Dict[str, Any]] = field(default_factory=list)
     conflicts_resolved: List[Dict[str, Any]] = field(default_factory=list)
     
-    # Final decision
-    final_answer: str
+    # Final decision continued
     accepted_facts: List[Dict[str, Any]] = field(default_factory=list)
     rejected_facts: List[Dict[str, Any]] = field(default_factory=list)
     overall_confidence: float = 0.0

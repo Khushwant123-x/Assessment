@@ -158,7 +158,7 @@ def main():
                 
                 # Answer
                 st.subheader("Answer")
-                st.info(result["answer"])
+                st.markdown(result["answer"])
                 
                 # Confidence
                 col1, col2, col3, col4 = st.columns(4)
@@ -263,10 +263,15 @@ def main():
                                 f"Query {i}: {hist_result['query'][:50]}...",
                                 expanded=(i == len(st.session_state.query_history))
                             ):
-                                st.write(f"**Answer:** {hist_result['answer']}")
-                                st.write(f"**Confidence:** {hist_result['confidence']:.2%}")
-                                st.write(f"**Conflicts Detected:** {hist_result['conflicts_detected']}")
-                                st.write(f"**Conflicts Resolved:** {hist_result['conflicts_resolved']}")
+                                st.markdown(hist_result['answer'])
+                                st.divider()
+                                col1, col2, col3 = st.columns(3)
+                                with col1:
+                                    st.metric("Confidence", f"{hist_result['confidence']:.1%}")
+                                with col2:
+                                    st.metric("Conflicts Detected", hist_result['conflicts_detected'])
+                                with col3:
+                                    st.metric("Conflicts Resolved", hist_result['conflicts_resolved'])
                     else:
                         st.info("No queries processed yet")
 

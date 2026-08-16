@@ -166,7 +166,7 @@ class TemporalConflictRAG:
         resolutions: List[Resolution]
     ) -> Tuple[str, List[Fact], List[Fact], float]:
         """
-        Generate a final answer based on accepted facts.
+        Generate a well-structured, ChatGPT/Claude-like answer based on accepted facts.
         
         Returns:
             (answer, accepted_facts, rejected_facts, confidence)
@@ -175,11 +175,13 @@ class TemporalConflictRAG:
         accepted_facts = []
         rejected_facts = []
         confidence_scores = []
+        resolution_strategies_used = []
         
         for resolution in resolutions:
             if resolution.accepted_fact:
                 accepted_facts.append(resolution.accepted_fact)
                 confidence_scores.append(resolution.confidence_score)
+                resolution_strategies_used.append(resolution.resolution_strategy)
             rejected_facts.extend(resolution.rejected_facts)
         
         # Include facts that had no conflicts
@@ -193,18 +195,62 @@ class TemporalConflictRAG:
                 accepted_facts.append(fact)
                 confidence_scores.append(fact.reliability_score)
         
-        # Generate answer text
+        # Generate structured answer text
         if not accepted_facts:
-            answer = "I could not find reliable information to answer your question. There were conflicting claims from multiple sources that could not be resolved."
+            answer = """**Unable to Provide Answer**
+
+I could not find reliable information to answer your question. 
+
+**Reason:** There were conflicting claims from multiple sources that could not be resolved with confidence.
+
+**Recommendation:** Please provide additional sources or clarify your question for better results."""
             confidence = 0.0
         else:
-            # Combine facts into coherent answer
-            answer_parts = []
-            for fact in sorted(accepted_facts, key=lambda f: f.source_name):
-                source_indicator = f"[{fact.source_name}]"
-                answer_parts.append(f"{fact.text.strip()} {source_indicator}")
+            # Group facts by source for better organization
+            facts_by_source = {}
+            for fact in accepted_facts:
+                source = fact.source_name or "Unknown Source"
+                if source not in facts_by_source:
+                    facts_by_source[source] = []
+                facts_by_source[source].append(fact)
             
-            answer = " ".join(answer_parts)
+            # Build structured answer
+            answer_parts = []
+            
+            # Main answer - synthesize key information
+            key_facts = [f.text.strip() for f in sorted(accepted_facts, key=lambda x: x.reliability_score, reverse=True)[:3]]
+            if key_facts:
+                answer_parts.append("**Summary**\n")
+                answer_parts.append(key_facts[0])
+                answer_parts.append("\n")
+            
+            # Key Points section
+            if len(key_facts) > 1:
+                answer_parts.append("\n**Key Points**\n")
+                for i, fact in enumerate(key_facts[1:], 1):
+                    answer_parts.append(f"• {fact}\n")
+            
+            # Sources and Details section
+            answer_parts.append("\n**Details by Source**\n")
+            for source, source_facts in sorted(facts_by_source.items()):
+                answer_parts.append(f"\n**{source}**\n")
+                for fact in source_facts:
+                    reliability_indicator = "✓ High confidence" if fact.reliability_score > 0.7 else "◆ Medium confidence" if fact.reliability_score > 0.4 else "○ Lower confidence"
+                    answer_parts.append(f"• {fact.text.strip()}\n")
+                    answer_parts.append(f"  {reliability_indicator}\n")
+            
+            # Confidence metrics section
+            answer_parts.append("\n**Confidence Metrics**\n")
+            if confidence_scores:
+                avg_confidence = sum(confidence_scores) / len(confidence_scores)
+                answer_parts.append(f"• Overall Confidence: {avg_confidence*100:.1f}%\n")
+            answer_parts.append(f"• Sources Analyzed: {len(facts_by_source)}\n")
+            answer_parts.append(f"• Facts Verified: {len(accepted_facts)}\n")
+            
+            if len(rejected_facts) > 0:
+                answer_parts.append(f"• Conflicting Claims Resolved: {len(rejected_facts)}\n")
+            
+            answer = "".join(answer_parts)
             
             # Calculate overall confidence
             if confidence_scores:

@@ -119,9 +119,27 @@ class SourceIngestionPipeline:
         video_id = self._extract_youtube_id(video_url)
         
         try:
-            # Fetch transcript
-            transcript_data = YouTubeTranscriptApi.get_transcript(video_id)
-            full_text = "\n".join([item["text"] for item in transcript_data])
+            # Try to fetch transcript with language fallback
+            api = YouTubeTranscriptApi()
+            
+            # First, try to get available transcripts
+            try:
+                # Try multiple languages: English, Spanish, French, German, Hindi, and any available
+                transcript_data = api.fetch(video_id, languages=['en', 'es', 'fr', 'de', 'hi'])
+            except NoTranscriptFound:
+                # If those don't work, get the list of available transcripts and use the first one
+                transcript_list = api.list(video_id)
+                # Try to find any available transcript (including auto-generated)
+                available_transcripts = transcript_list.get_available_transcripts()
+                if available_transcripts.manual_transcripts:
+                    transcript = list(available_transcripts.manual_transcripts)[0]
+                elif available_transcripts.generated_transcripts:
+                    transcript = list(available_transcripts.generated_transcripts)[0]
+                else:
+                    raise ValueError(f"No transcripts available for video {video_url}")
+                transcript_data = transcript.fetch()
+            
+            full_text = "\n".join([item.text for item in transcript_data])
         except (TranscriptsDisabled, NoTranscriptFound) as e:
             raise ValueError(f"Could not fetch transcript for video {video_url}: {e}")
         
